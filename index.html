@@ -396,9 +396,10 @@
 <div class="topbar">
   <div class="logo">Mort Subite <span>AI</span></div>
   <div class="mode-toggle">
-    <button class="mode-btn active" id="mb-trainee" onclick="setMode('trainee')">🎓 Trainee</button>
-    <button class="mode-btn"        id="mb-demo"    onclick="setMode('demo')">▶ Demo</button>
-    <button class="mode-btn"        id="mb-manager" onclick="setMode('manager')">⚙ Manager</button>
+    <button class="mode-btn active" id="mb-trainee"  onclick="setMode('trainee')">🎓 Trainee</button>
+    <button class="mode-btn"        id="mb-demo"     onclick="setMode('demo')">▶ Demo</button>
+    <button class="mode-btn"        id="mb-manager"  onclick="setMode('manager')">⚙ Manager</button>
+    <button class="mode-btn"        id="mb-training" onclick="setMode('training')" style="border-left:1px solid var(--border)">📋 Training</button>
   </div>
   <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
     <input id="key-input" type="password"
@@ -642,6 +643,22 @@
         </div>
       </div>
     </div>
+
+    <!-- ══ TRAINING ══ -->
+    <div id="training-wrap" style="display:none;flex:1;flex-direction:column;overflow:hidden">
+      <div class="panel-header">
+        <div class="status-dot"></div>
+        <div class="panel-title">Staff Training — Food Safety</div>
+      </div>
+      <iframe
+        id="training-iframe"
+        src="http://localhost:3000"
+        style="flex:1;border:none;width:100%;height:100%"
+        title="Staff Training Module"
+        allow="autoplay"
+      ></iframe>
+    </div>
+
   </div><!-- /left-panel -->
 
   <!-- ── RIGHT: MENU PANEL ── -->
@@ -847,14 +864,17 @@ async function checkServerAnswer(question, answer) {
 // ─────────────────────────────────
 function setMode(m) {
   currentMode = m;
-  ['trainee','demo','manager'].forEach(id => {
+  ['trainee','demo','manager','training'].forEach(id => {
     document.getElementById('mb-'+id).className = 'mode-btn'+(m===id?' active':'');
   });
-  document.getElementById('trainee-wrap').style.display = m==='trainee' ? 'flex' : 'none';
-  document.getElementById('demo-wrap').style.display    = m==='demo'    ? 'flex' : 'none';
-  document.getElementById('manager-wrap').style.display = m==='manager' ? 'flex' : 'none';
+  document.getElementById('trainee-wrap').style.display  = m==='trainee'  ? 'flex' : 'none';
+  document.getElementById('demo-wrap').style.display     = m==='demo'     ? 'flex' : 'none';
+  document.getElementById('manager-wrap').style.display  = m==='manager'  ? 'flex' : 'none';
+  document.getElementById('training-wrap').style.display = m==='training' ? 'flex' : 'none';
+  // Hide menu panel in training mode (training app has its own layout)
+  document.getElementById('menu-panel').style.display    = m==='training' ? 'none' : '';
   const leftBtn = document.getElementById('mob-left');
-  leftBtn.textContent = m==='trainee' ? '💬 Chat' : m==='demo' ? '▶ Demo' : '⚙ Manage';
+  leftBtn.textContent = m==='trainee' ? '💬 Chat' : m==='demo' ? '▶ Demo' : m==='training' ? '📋 Train' : '⚙ Manage';
   if (m==='manager') renderMgrList();
 }
 
