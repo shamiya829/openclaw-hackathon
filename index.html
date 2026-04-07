@@ -3,398 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mort Subite AI — Menu Brain</title>
-  <style>
-    :root {
-      --bg: #0d0d14; --surface: #14141f; --surface2: #1c1c2e; --border: #2a2a3d;
-      --accent: #c8a84b; --accent2: #e8c96a; --green: #4ade80; --red: #f87171;
-      --text: #e8e8f0; --muted: #6b7280; --chat-user: #1e1e30; --chat-ai: #191926;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: var(--bg); color: var(--text);
-      height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
-    }
-
-    /* ── TOP BAR ── */
-    .topbar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 11px 20px; background: var(--surface);
-      border-bottom: 1px solid var(--border); flex-shrink: 0; gap: 10px;
-    }
-    .logo { font-size: 18px; font-weight: 700; color: var(--accent); letter-spacing: -.5px; white-space: nowrap; }
-    .logo span { color: var(--text); }
-    .mode-toggle {
-      display: flex; background: var(--bg);
-      border-radius: 8px; border: 1px solid var(--border); overflow: hidden; flex-shrink: 0;
-    }
-    .mode-btn {
-      padding: 7px 14px; font-size: 12px; font-weight: 600; cursor: pointer;
-      border: none; background: transparent; color: var(--muted); transition: all .15s; white-space: nowrap;
-    }
-    .mode-btn.active { background: var(--surface2); color: var(--text); }
-    .btn-reset {
-      padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer;
-      border: 1px solid var(--border); background: transparent; color: var(--muted); transition: all .15s; white-space: nowrap;
-    }
-    .btn-reset:hover { color: var(--text); border-color: var(--muted); }
-
-    /* ── MAIN ── */
-    .main { display: flex; flex: 1; overflow: hidden; }
-
-    /* ── SHARED ── */
-    .panel-header {
-      padding: 12px 18px 10px; border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 8px; flex-shrink: 0;
-    }
-    .panel-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
-    .status-dot {
-      width: 7px; height: 7px; border-radius: 50%; background: var(--green);
-      box-shadow: 0 0 6px var(--green); animation: pulse 2s infinite;
-    }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-
-    .left-panel {
-      flex: 1; display: flex; flex-direction: column;
-      border-right: 1px solid var(--border); min-width: 0; overflow: hidden; position: relative;
-    }
-
-    /* ══ TRAINEE ══ */
-    .trainee-wrap { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
-    .messages {
-      flex: 1; overflow-y: auto; padding: 16px;
-      display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth;
-    }
-    .messages::-webkit-scrollbar { width: 3px; }
-    .messages::-webkit-scrollbar-thumb { background: var(--border); }
-    .msg { display: flex; gap: 10px; animation: fadeUp .25s ease; }
-    @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
-    .msg-avatar {
-      width: 30px; height: 30px; border-radius: 7px;
-      display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0;
-    }
-    .av-customer{background:#2d2d4e} .av-ai{background:#1e2d1e}
-    .av-server{background:#2d2518} .av-system{background:#1e1e35} .av-trainer{background:#2d1e1e}
-    .msg-content { flex: 1; min-width: 0; }
-    .msg-label { font-size: 10px; font-weight: 700; color: var(--muted); margin-bottom: 3px; text-transform: uppercase; letter-spacing: .5px; }
-    .msg-bubble {
-      background: var(--surface2); border-radius: 9px; padding: 9px 13px;
-      font-size: 13px; line-height: 1.6; border: 1px solid var(--border);
-    }
-    .bubble-customer{background:var(--chat-user);border-color:#2a2a50}
-    .bubble-ai      {background:var(--chat-ai);border-color:#1a2a1a}
-    .bubble-system  {background:#0d0d1f;border-color:#1e1e50;font-size:12px;color:var(--muted)}
-    .bubble-wrong   {background:#1f0d0d;border-color:#7f1d1d}
-    .bubble-correct {background:#0d1f0d;border-color:#166534}
-    .verdict { display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;margin-bottom:5px; }
-    .verdict.wrong{color:var(--red)} .verdict.correct{color:var(--green)}
-
-    .typing-indicator {
-      display:flex;gap:4px;padding:10px 13px;
-      background:var(--chat-ai);border-radius:9px;border:1px solid #1a2a1a;width:fit-content;
-    }
-    .dot{width:5px;height:5px;border-radius:50%;background:var(--muted)}
-    .dot:nth-child(1){animation:bounce 1.2s infinite 0s}
-    .dot:nth-child(2){animation:bounce 1.2s infinite .2s}
-    .dot:nth-child(3){animation:bounce 1.2s infinite .4s}
-    @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
-
-    .tag{display:inline-block;font-size:10px;padding:1px 6px;border-radius:4px;font-weight:600;margin:1px}
-    .tag-gf{background:#166534;color:#86efac} .tag-no{background:#7f1d1d;color:#fca5a5}
-    .tag-ask{background:#3d2800;color:#fcd34d} .tag-pop{background:#1e3a5f;color:#93c5fd}
-    .tag-light{background:#2d1b69;color:#c4b5fd} .tag-sub{background:#2a2a1a;color:#d4d48a}
-
-    .trainer-sub {
-      padding: 12px 18px; border-top: 1px solid var(--border); flex-shrink: 0; background: #0d0a00;
-    }
-    .trainer-sub-label { font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px; }
-    .trainer-q { font-size:12px;color:var(--muted);margin-bottom:8px; }
-    .trainer-row { display:flex;gap:8px; }
-    .trainer-row input {
-      flex:1;background:var(--surface);border:1px solid var(--border);
-      border-radius:6px;padding:8px 11px;font-size:13px;color:var(--text);outline:none;
-    }
-    .trainer-row input:focus { border-color:var(--accent); }
-    .btn-check {
-      background:var(--accent);color:#000;border:none;
-      border-radius:6px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;
-    }
-    .btn-check:hover { background:var(--accent2); }
-
-    .step-bar { display:flex;gap:6px;padding:8px 18px;flex-shrink:0; }
-    .step-dot{flex:1;height:3px;border-radius:2px;background:var(--border);transition:background .4s}
-    .step-dot.done{background:var(--accent)} .step-dot.active{background:var(--accent2);animation:shimmer 1s infinite}
-    @keyframes shimmer{0%,100%{opacity:1}50%{opacity:.5}}
-
-    .input-bar { padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0; }
-    .input-bar input {
-      flex:1;background:var(--surface2);border:1px solid var(--border);
-      border-radius:8px;padding:10px 13px;font-size:16px;color:var(--text);outline:none;
-    }
-    .input-bar input:focus { border-color:var(--accent); }
-    .input-bar input::placeholder { color:var(--muted);font-size:14px; }
-    .btn-send {
-      background:var(--accent);color:#000;border:none;
-      border-radius:8px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;
-    }
-    .btn-send:hover{background:var(--accent2)} .btn-send:disabled{opacity:.4;cursor:not-allowed}
-    .btn-cap{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:15px;cursor:pointer;}
-    .btn-cap:hover{border-color:var(--accent)}
-
-    /* ══ DEMO ══ */
-    .demo-wrap { display:none;flex-direction:column;flex:1;overflow:hidden; }
-    .demo-hero {
-      padding:24px 20px 16px;text-align:center;flex-shrink:0;
-      border-bottom:1px solid var(--border);
-    }
-    .demo-hero h2{font-size:20px;color:var(--accent);margin-bottom:6px}
-    .demo-hero p {font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5}
-    .btn-run-demo {
-      background:var(--accent);color:#000;border:none;border-radius:10px;
-      padding:13px 32px;font-size:15px;font-weight:700;cursor:pointer;transition:all .15s;display:inline-block;
-    }
-    .btn-run-demo:hover{background:var(--accent2);transform:translateY(-1px)}
-    .btn-run-demo:disabled{opacity:.5;cursor:not-allowed;transform:none}
-    .demo-messages {
-      flex:1;overflow-y:auto;padding:16px;
-      display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth;
-    }
-    .demo-messages::-webkit-scrollbar{width:3px}
-    .demo-messages::-webkit-scrollbar-thumb{background:var(--border)}
-
-    /* ══ QUIZ ══ */
-    .quiz-overlay {
-      position:absolute;inset:0;background:var(--bg);z-index:50;
-      display:flex;flex-direction:column;overflow:hidden;
-    }
-    .quiz-intro {
-      flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-      padding:24px;text-align:center;gap:14px;
-    }
-    .quiz-intro h2{font-size:22px;color:var(--accent)}
-    .quiz-intro p {font-size:13px;color:var(--muted);line-height:1.6;max-width:340px}
-    .btn-start-quiz{
-      background:var(--accent);color:#000;border:none;border-radius:10px;
-      padding:12px 28px;font-size:14px;font-weight:700;cursor:pointer;transition:all .15s;
-    }
-    .btn-start-quiz:hover{background:var(--accent2);transform:translateY(-1px)}
-    .btn-skip-quiz{background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;margin-top:4px}
-    .btn-skip-quiz:hover{color:var(--text)}
-    .quiz-progress{
-      display:flex;align-items:center;gap:10px;padding:12px 18px;
-      border-bottom:1px solid var(--border);flex-shrink:0;
-    }
-    .quiz-progress-label{font-size:11px;color:var(--muted);font-weight:600}
-    .quiz-progress-bar{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
-    .quiz-progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s}
-    .quiz-q-wrap{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
-    .quiz-q-card{
-      background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;
-    }
-    .quiz-q-num{font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
-    .quiz-q-text{font-size:14px;line-height:1.5;margin-bottom:12px}
-    .quiz-q-input{
-      width:100%;background:var(--surface);border:1px solid var(--border);border-radius:7px;
-      padding:9px 12px;font-size:13px;color:var(--text);outline:none;font-family:inherit;resize:none;
-    }
-    .quiz-q-input:focus{border-color:var(--accent)}
-    .quiz-footer{padding:12px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;flex-shrink:0}
-    .btn-submit-quiz{
-      background:var(--accent);color:#000;border:none;border-radius:8px;
-      padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;
-    }
-    .btn-submit-quiz:hover{background:var(--accent2)}
-    .btn-submit-quiz:disabled{opacity:.4;cursor:not-allowed}
-    .profile-card{
-      background:var(--surface2);border:1px solid var(--border);border-radius:10px;
-      padding:14px;margin-bottom:8px;
-    }
-    .profile-section-title{font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
-    .profile-skill{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-    .profile-skill-name{font-size:12px;flex:1}
-    .profile-skill-bar{width:80px;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
-    .profile-skill-fill{height:100%;border-radius:3px;transition:width .5s}
-    .skill-strong{background:var(--green)} .skill-ok{background:var(--accent)} .skill-weak{background:var(--red)}
-
-    /* ══ MANAGER ══ */
-    .manager-wrap { display:none;flex-direction:column;flex:1;overflow:hidden; }
-    .mgr-mode-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--surface)}
-    .mgr-mode-tab{
-      flex:1;padding:9px;font-size:12px;font-weight:600;color:var(--muted);
-      background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;
-    }
-    .mgr-mode-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
-
-    /* Reviews panel */
-    .reviews-panel{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
-    .reviews-panel::-webkit-scrollbar{width:3px}
-    .reviews-panel::-webkit-scrollbar-thumb{background:var(--border)}
-    .review-stat-row{display:flex;gap:8px;flex-wrap:wrap}
-    .review-stat{
-      flex:1;min-width:120px;background:var(--surface2);border:1px solid var(--border);
-      border-radius:8px;padding:10px 12px;text-align:center;
-    }
-    .review-stat-num{font-size:22px;font-weight:700;color:var(--accent)}
-    .review-stat-label{font-size:10px;color:var(--muted);margin-top:2px}
-    .review-section{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px}
-    .review-section-title{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
-    .review-issue{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border)}
-    .review-issue:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
-    .issue-sev{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;flex-shrink:0;margin-top:1px}
-    .sev-high{background:#450a0a;color:#fca5a5} .sev-medium{background:#2d1a00;color:#fcd34d} .sev-low{background:#1a2d00;color:#86efac}
-    .issue-body{flex:1}
-    .issue-title{font-size:12px;font-weight:700;margin-bottom:2px}
-    .issue-detail{font-size:11px;color:var(--muted);line-height:1.4}
-    .strength-item{display:flex;align-items:flex-start;gap:6px;margin-bottom:6px;font-size:12px;line-height:1.4}
-    .quote-card{background:var(--bg);border-left:3px solid var(--accent);padding:8px 12px;border-radius:0 6px 6px 0;margin-bottom:6px}
-    .quote-text{font-size:12px;color:var(--text);line-height:1.5;font-style:italic;margin-bottom:3px}
-    .quote-source{font-size:10px;color:var(--muted)}
-    .btn-ai-analyze{
-      background:var(--surface);border:1px solid var(--accent);color:var(--accent);
-      border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;
-      display:flex;align-items:center;gap:6px;transition:all .15s;width:100%;justify-content:center;
-    }
-    .btn-ai-analyze:hover{background:var(--accent);color:#000}
-    .btn-ai-analyze:disabled{opacity:.5;cursor:not-allowed}
-    .mgr-toolbar {
-      padding:10px 16px;border-bottom:1px solid var(--border);
-      display:flex;align-items:center;gap:8px;flex-shrink:0;
-    }
-    .mgr-toolbar input {
-      flex:1;background:var(--surface2);border:1px solid var(--border);
-      border-radius:6px;padding:7px 11px;font-size:13px;color:var(--text);outline:none;
-    }
-    .mgr-toolbar input:focus{border-color:var(--accent)}
-    .mgr-toolbar input::placeholder{color:var(--muted)}
-    .btn-add {
-      background:var(--accent);color:#000;border:none;
-      border-radius:6px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;
-    }
-    .btn-add:hover{background:var(--accent2)}
-    .mgr-list{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:5px}
-    .mgr-list::-webkit-scrollbar{width:3px}
-    .mgr-list::-webkit-scrollbar-thumb{background:var(--border)}
-
-    .mgr-cat-label{font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;padding:8px 2px 3px}
-    .mgr-item {
-      background:var(--surface2);border:1px solid var(--border);border-radius:8px;
-      padding:9px 12px;display:flex;align-items:center;gap:10px;transition:border-color .15s;
-    }
-    .mgr-item:hover{border-color:#3a3a5a}
-    .mgr-item-info{flex:1;min-width:0}
-    .mgr-item-name{font-size:12px;font-weight:700}
-    .mgr-item-sub {font-size:11px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .mgr-item-actions{display:flex;gap:5px;flex-shrink:0}
-    .btn-edit,.btn-del{font-size:11px;font-weight:600;padding:3px 9px;border-radius:5px;border:none;cursor:pointer}
-    .btn-edit{background:var(--surface);color:var(--accent);border:1px solid var(--border)}
-    .btn-edit:hover{border-color:var(--accent)}
-    .btn-del{background:#2d1010;color:var(--red);border:1px solid #4d1010}
-    .btn-del:hover{background:#3d1515}
-
-    /* Editor modal */
-    .mgr-editor {
-      position:absolute;inset:0;background:rgba(0,0,0,.75);
-      display:flex;align-items:center;justify-content:center;z-index:100;padding:16px;
-    }
-    .mgr-editor-box {
-      background:var(--surface);border:1px solid var(--border);border-radius:12px;
-      width:100%;max-width:500px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;
-    }
-    .mgr-editor-header {
-      padding:13px 18px;border-bottom:1px solid var(--border);
-      display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
-    }
-    .mgr-editor-title{font-size:14px;font-weight:700}
-    .btn-close{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0 4px;line-height:1}
-    .btn-close:hover{color:var(--text)}
-    .mgr-editor-body{padding:16px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:11px}
-    .mgr-editor-body::-webkit-scrollbar{width:3px}
-    .field-row{display:flex;flex-direction:column;gap:3px}
-    .field-row label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
-    .field-row input,.field-row select,.field-row textarea {
-      background:var(--surface2);border:1px solid var(--border);border-radius:6px;
-      padding:8px 11px;font-size:13px;color:var(--text);outline:none;font-family:inherit;
-    }
-    .field-row input:focus,.field-row select:focus,.field-row textarea:focus{border-color:var(--accent)}
-    .field-row textarea{resize:vertical;min-height:55px}
-    .field-row select option{background:var(--surface2)}
-    .field-hint{font-size:10px;color:var(--muted)}
-    .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-    .mgr-editor-footer {
-      padding:11px 18px;border-top:1px solid var(--border);
-      display:flex;justify-content:flex-end;gap:8px;flex-shrink:0;
-    }
-    .btn-cancel{background:none;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer}
-    .btn-cancel:hover{color:var(--text);border-color:var(--muted)}
-    .btn-save{background:var(--accent);color:#000;border:none;border-radius:6px;padding:7px 20px;font-size:13px;font-weight:700;cursor:pointer}
-    .btn-save:hover{background:var(--accent2)}
-
-    /* ── RIGHT: MENU PANEL ── */
-    .menu-panel { width:360px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden; }
-    .menu-panel-header {
-      padding:12px 16px 10px;border-bottom:1px solid var(--border);
-      display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
-    }
-    .menu-panel-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
-    .menu-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
-    .menu-tab{flex:1;padding:8px;font-size:12px;font-weight:600;color:var(--muted);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
-    .menu-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
-    .menu-content{flex:1;overflow-y:auto;padding:10px}
-    .menu-content::-webkit-scrollbar{width:3px}
-    .menu-content::-webkit-scrollbar-thumb{background:var(--border)}
-
-    .menu-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;margin-bottom:6px;transition:border-color .15s}
-    .menu-card:hover{border-color:#3a3a5a}
-    .menu-card-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px}
-    .menu-card-name{font-size:12px;font-weight:700}
-    .menu-card-price{font-size:12px;font-weight:700;color:var(--accent);white-space:nowrap;margin-left:6px}
-    .menu-card-desc{font-size:11px;color:var(--muted);margin-bottom:5px;line-height:1.4}
-    .menu-card-tags{display:flex;flex-wrap:wrap;gap:2px}
-    .menu-cat-label{font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;padding:7px 0 3px}
-
-    .json-view{font-family:'Consolas','Monaco',monospace;font-size:10px;line-height:1.7;color:var(--text);white-space:pre;overflow-x:auto}
-    .jk{color:#60a5fa} .js{color:#86efac} .jn{color:#fbbf24} .jt{color:#4ade80} .jf{color:#f87171} .jp{color:var(--muted)}
-
-    .menu-card.hl{border-color:var(--accent);background:#1a1608;animation:glow .6s ease}
-    @keyframes glow{0%{box-shadow:0 0 0 0 rgba(200,168,75,.4)}50%{box-shadow:0 0 0 8px rgba(200,168,75,0)}100%{box-shadow:none}}
-    @keyframes spin{to{transform:rotate(360deg)}}
-
-    /* ── MOBILE TAB BAR ── */
-    .mobile-tabs{display:none;flex-shrink:0;border-top:1px solid var(--border);background:var(--surface)}
-    .mobile-tab-btn{flex:1;padding:11px 6px;font-size:11px;font-weight:600;color:var(--muted);background:none;border:none;cursor:pointer;border-top:2px solid transparent;transition:all .15s}
-    .mobile-tab-btn.active{color:var(--accent);border-top-color:var(--accent)}
-
-    /* ── RESPONSIVE ── */
-    @media (min-width:601px){
-      .left-panel,.menu-panel{display:flex!important}
-      .mobile-tabs{display:none!important}
-      .mode-toggle{display:flex!important}
-      .btn-reset{display:block!important}
-    }
-    @media (max-width:600px){
-      .topbar{padding:9px 12px;flex-wrap:wrap;gap:6px}
-      .logo{font-size:16px}
-      .mode-toggle{display:none}
-      .btn-reset{display:none}
-      .topbar-right{width:100%;justify-content:flex-end}
-      .main{flex-direction:column}
-      .left-panel{border-right:none;border-bottom:1px solid var(--border);flex:1}
-      .left-panel.hidden{display:none!important}
-      .menu-panel{width:100%;flex:1}
-      .menu-panel.hidden{display:none!important}
-      .mobile-tabs{display:flex}
-      .messages,.demo-messages,.mgr-list{padding:10px}
-      .msg-bubble{font-size:13px}
-      .input-bar{padding:9px 12px}
-      .field-grid{grid-template-columns:1fr}
-    }
-  </style>
+  <title>🍣 Sushi Master AI — Menu Brain</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
 <div class="topbar">
-  <div class="logo">Mort Subite <span>AI</span></div>
+  <div class="logo">🍣 Sushi <span>Master</span></div>
   <div class="mode-toggle">
     <button class="mode-btn active" id="mb-trainee" onclick="setMode('trainee')">🎓 Trainee</button>
     <button class="mode-btn"        id="mb-demo"    onclick="setMode('demo')">▶ Demo</button>
@@ -405,22 +20,19 @@
       placeholder="Groq API key…"
       style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:11px;color:var(--text);outline:none;width:140px"
       oninput="saveKey(this.value)" />
+    <button class="btn-reset" onclick="importMenuJSON()">📤 Load JSON</button>
     <button class="btn-reset" onclick="resetChat()">Reset</button>
   </div>
 </div>
 
 <div class="main">
   <div class="left-panel" id="left-panel">
-
-    <!-- ══ TRAINEE ══ -->
     <div class="trainee-wrap" id="trainee-wrap">
-
-      <!-- Quiz overlay -->
       <div class="quiz-overlay" id="quiz-overlay">
         <div class="quiz-intro" id="quiz-intro">
           <div style="font-size:36px">🎓</div>
-          <h2>Knowledge Assessment</h2>
-          <p>Before diving in, let's see what you already know about the Mort Subite menu. 5 questions — takes about 2 minutes. Your profile will personalize your training.</p>
+          <h2>Sushi Knowledge Assessment</h2>
+          <p>Before diving in, let's see what you already know about our menu. 5 questions — takes about 2 minutes. Your profile will personalize your training.</p>
           <button class="btn-start-quiz" onclick="startQuiz()">Start Assessment</button>
           <button class="btn-skip-quiz" onclick="skipQuiz()">Skip — go straight to chat</button>
         </div>
@@ -456,18 +68,17 @@
         </div>
       </div>
       <div class="input-bar">
-        <button class="btn-cap" title="Cappuccino" onclick="triggerCap()">☕</button>
+        <button class="btn-cap" title="Miso Soup" onclick="triggerCap()">🍲</button>
         <input id="user-input" type="text" placeholder="Ask about the menu…" onkeydown="if(event.key==='Enter')sendMsg()"/>
         <button class="btn-send" id="send-btn" onclick="sendMsg()">Send</button>
       </div>
     </div>
 
-    <!-- ══ DEMO ══ -->
     <div class="demo-wrap" id="demo-wrap">
       <div class="demo-hero">
-        <h2>One-Click Demo ☕</h2>
-        <p>Walks through gluten-free query → recommendation →<br>cappuccino pairing → server fact-check → milk swap.</p>
-        <button class="btn-run-demo" id="run-demo-btn" onclick="runDemo()">Run Demo ☕</button>
+        <h2>One-Click Demo 🍣</h2>
+        <p>Walks through allergy query → recommendation →<br>miso soup pairing → server fact-check → roll customization.</p>
+        <button class="btn-run-demo" id="run-demo-btn" onclick="runDemo()">Run Demo 🍣</button>
       </div>
       <div class="step-bar" id="demo-step-bar" style="display:none;padding:8px 20px">
         <div class="step-dot" id="d1"></div><div class="step-dot" id="d2"></div>
@@ -477,95 +88,25 @@
       <div class="demo-messages" id="demo-messages"></div>
     </div>
 
-    <!-- ══ MANAGER ══ -->
     <div class="manager-wrap" id="manager-wrap">
       <div class="mgr-mode-tabs">
-        <button class="mgr-mode-tab active" id="mgr-tab-items"   onclick="switchMgrTab('items')">🍽️ Menu Items</button>
+        <button class="mgr-mode-tab active" id="mgr-tab-items"   onclick="switchMgrTab('items')">🍣 Menu Items</button>
         <button class="mgr-mode-tab"        id="mgr-tab-reviews" onclick="switchMgrTab('reviews')">⭐ Reviews Intel</button>
       </div>
 
-      <!-- Reviews panel -->
       <div class="reviews-panel" id="reviews-panel" style="display:none">
         <div class="review-stat-row">
-          <div class="review-stat"><div class="review-stat-num">4.7★</div><div class="review-stat-label">Avg Rating</div></div>
-          <div class="review-stat"><div class="review-stat-num">98%</div><div class="review-stat-label">Recommend</div></div>
-          <div class="review-stat"><div class="review-stat-num">847</div><div class="review-stat-label">Reviews</div></div>
-          <div class="review-stat"><div class="review-stat-num">#4</div><div class="review-stat-label">Draft Beer ATX</div></div>
+          <div class="review-stat"><div class="review-stat-num">4.8★</div><div class="review-stat-label">Avg Rating</div></div>
+          <div class="review-stat"><div class="review-stat-num">99%</div><div class="review-stat-label">Recommend</div></div>
+          <div class="review-stat"><div class="review-stat-num">624</div><div class="review-stat-label">Reviews</div></div>
+          <div class="review-stat"><div class="review-stat-num">#1</div><div class="review-stat-label">Sushi in Town</div></div>
         </div>
-
-        <button class="btn-ai-analyze" id="ai-analyze-btn" onclick="runReviewAnalysis()">
-          ✨ AI: What should we improve?
-        </button>
+        <button class="btn-ai-analyze" id="ai-analyze-btn" onclick="runReviewAnalysis()">✨ AI: What should we improve?</button>
         <div id="ai-analysis-output" style="display:none"></div>
-
         <div class="review-section">
-          <div class="review-section-title">🔴 Top Issues to Fix</div>
-          <div class="review-issue">
-            <span class="issue-sev sev-high">HIGH</span>
-            <div class="issue-body">
-              <div class="issue-title">Parking friction — no guidance communicated</div>
-              <div class="issue-detail">5+ reviews mention parking as a barrier. No mitigation communicated on website, Google, or Yelp. Fix: update all platforms with nearby lots + walk time.</div>
-            </div>
-          </div>
-          <div class="review-issue">
-            <span class="issue-sev sev-medium">MED</span>
-            <div class="issue-body">
-              <div class="issue-title">Slow acknowledgment during quiet hours</div>
-              <div class="issue-detail">Documented 5-minute wait to be greeted on Monday evening. Implement an 80-second greeting standard across all shifts.</div>
-            </div>
-          </div>
-          <div class="review-issue">
-            <span class="issue-sev sev-medium">MED</span>
-            <div class="issue-body">
-              <div class="issue-title">Food service information gap</div>
-              <div class="issue-detail">Customers unsure what food is available. Older reviews mention food trucks — current status unclear. Standardize staff FAQ response.</div>
-            </div>
-          </div>
-          <div class="review-issue">
-            <span class="issue-sev sev-low">LOW</span>
-            <div class="issue-body">
-              <div class="issue-title">Music volume inconsistency</div>
-              <div class="issue-detail">Music called "too loud" in 2+ reviews — contradicts the sophisticated European vibe. Assign daily volume responsibility with dB guidelines by crowd level.</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="review-section">
-          <div class="review-section-title">🟢 Top Strengths (keep doing these)</div>
-          <div class="strength-item">⭐ <span><strong>Expert staff knowledge</strong> — mentioned in 40%+ of reviews. Piper, Adam, MG mentioned by name. Primary brand differentiator.</span></div>
-          <div class="strength-item">🍺 <span><strong>Belgian beer curation</strong> — mentioned in 90%+ of reviews. 30 beers on draft, proper glassware, extensive bottle list.</span></div>
-          <div class="strength-item">🏠 <span><strong>Atmosphere</strong> — European vibe mentioned in 85%+ of reviews. Warm, sophisticated yet casual.</span></div>
-          <div class="strength-item">👤 <span><strong>Owner presence</strong> — "extremely attentive" and "amazing" in 15+ reviews. Sets the service standard.</span></div>
-          <div class="strength-item">💰 <span><strong>Value perception</strong> — quality noted as "worth it" and "reasonable" vs. what you'd pay elsewhere.</span></div>
-        </div>
-
-        <div class="review-section">
-          <div class="review-section-title">💬 Customer Quote Highlights</div>
-          <div class="quote-card">
-            <div class="quote-text">"Her professionalism, charm, and knowledge of beer was unmatched."</div>
-            <div class="quote-source">TripAdvisor — about Piper</div>
-          </div>
-          <div class="quote-card">
-            <div class="quote-text">"Adam went out of his way to find drinks for my girlfriend who doesn't even like beer."</div>
-            <div class="quote-source">Wanderlog</div>
-          </div>
-          <div class="quote-card">
-            <div class="quote-text">"Beer was fantastic and served with impeccable care."</div>
-            <div class="quote-source">Wanderlog</div>
-          </div>
-          <div class="quote-card">
-            <div class="quote-text">"I honestly don't have enough words to describe how awesome this place is!"</div>
-            <div class="quote-source">Wanderlog</div>
-          </div>
-        </div>
-
-        <div class="review-section">
-          <div class="review-section-title">⚡ Quick Wins This Week</div>
-          <div class="strength-item">🕐 <span>Brief all staff on 80-second greeting protocol (30 min)</span></div>
-          <div class="strength-item">🅿️ <span>Post parking guidance on Google Business &amp; Yelp (30 min)</span></div>
-          <div class="strength-item">🍽️ <span>Write standard FAQ answer for "Do you have food?" (20 min)</span></div>
-          <div class="strength-item">🔊 <span>Set volume guidelines per daypart, assign responsibility (30 min)</span></div>
-          <div class="strength-item">📅 <span>Schedule first monthly beer education session (15 min)</span></div>
+          <div class="review-section-title">🟢 Top Strengths</div>
+          <div class="strength-item">⭐ <span><strong>Expert chef knowledge</strong> — mentioned in 85%+ of reviews.</span></div>
+          <div class="strength-item">🍣 <span><strong>Fresh ingredient quality</strong> — mentioned in 95%+ of reviews.</span></div>
         </div>
       </div>
 
@@ -575,7 +116,6 @@
       </div>
       <div class="mgr-list" id="mgr-list"></div>
 
-      <!-- Editor modal -->
       <div class="mgr-editor" id="mgr-editor" style="display:none">
         <div class="mgr-editor-box">
           <div class="mgr-editor-header">
@@ -584,55 +124,45 @@
           </div>
           <div class="mgr-editor-body">
             <div class="field-grid">
-              <div class="field-row"><label>Name</label><input id="f-name" type="text" placeholder="Gambas al Ajillo"/></div>
-              <div class="field-row"><label>Price</label><input id="f-price" type="text" placeholder="$15.50"/></div>
+              <div class="field-row"><label>Name</label><input id="f-name" type="text" placeholder="California Roll"/></div>
+              <div class="field-row"><label>Price</label><input id="f-price" type="text" placeholder="$12.50"/></div>
             </div>
             <div class="field-row">
               <label>Category</label>
               <select id="f-category">
-                <option value="tapas">Tapas</option>
-                <option value="paella">Paella</option>
-                <option value="fideua">Fideuà</option>
-                <option value="sandwich">Sandwich</option>
-                <option value="plate">Plate</option>
-                <option value="highball">Highball</option>
-                <option value="spritz">Spritz</option>
-                <option value="aromatic">Aromatic Cocktail</option>
-                <option value="chaudronnier">Chaudronnier</option>
+                <option value="nigiri">Nigiri</option>
+                <option value="sashimi">Sashimi</option>
+                <option value="rolls">Rolls</option>
+                <option value="specialty_rolls">Specialty Rolls</option>
+                <option value="bowls">Bowls</option>
+                <option value="appetizers">Appetizers</option>
+                <option value="soup">Soup</option>
+                <option value="sides">Sides</option>
+                <option value="sake">Sake</option>
                 <option value="beer">Beer</option>
-                <option value="wine">Wine</option>
-                <option value="vermouth">Vermouth</option>
-                <option value="non_alcoholic">Non-Alcoholic</option>
+                <option value="drinks">Drinks</option>
               </select>
             </div>
             <div class="field-row"><label>Description</label><textarea id="f-desc" rows="2" placeholder="Short description…"></textarea></div>
             <div class="field-row">
               <label>Ingredients</label>
-              <input id="f-ingredients" type="text" placeholder="shrimp, garlic, olive oil, chili"/>
-              <div class="field-hint">Comma-separated</div>
+              <input id="f-ingredients" type="text" placeholder="crab, avocado, cucumber"/>
             </div>
             <div class="field-row">
               <label>Allergens</label>
-              <input id="f-allergens" type="text" placeholder="shellfish, dairy, gluten"/>
-              <div class="field-hint">Comma-separated</div>
+              <input id="f-allergens" type="text" placeholder="shellfish, raw fish"/>
             </div>
             <div class="field-row">
-              <label>Gluten Free</label>
-              <select id="f-gf">
-                <option value="true">Yes</option>
-                <option value="false">No</option>
-                <option value="ask">Ask kitchen</option>
-              </select>
+              <label>Can Cook Through</label>
+              <select id="f-cooked"><option value="false">No</option><option value="true">Yes</option><option value="ask">Ask</option></select>
             </div>
             <div class="field-row">
               <label>Tags</label>
-              <input id="f-tags" type="text" placeholder="popular, Spanish, gluten-free"/>
-              <div class="field-hint">Comma-separated</div>
+              <input id="f-tags" type="text" placeholder="popular, spicy, vegetarian"/>
             </div>
             <div class="field-row">
-              <label>Substitutions</label>
-              <textarea id="f-subs" rows="3" placeholder="no mayo (vegan) ($0)&#10;oat milk (+$1)"></textarea>
-              <div class="field-hint">One per line: option (price change)</div>
+              <label>Customizations</label>
+              <textarea id="f-subs" rows="3" placeholder="no raw fish (+$2)&#10;extra wasabi (free)"></textarea>
             </div>
           </div>
           <div class="mgr-editor-footer">
@@ -642,9 +172,8 @@
         </div>
       </div>
     </div>
-  </div><!-- /left-panel -->
+  </div>
 
-  <!-- ── RIGHT: MENU PANEL ── -->
   <div class="menu-panel" id="menu-panel">
     <div class="menu-panel-header">
       <div class="menu-panel-title">Menu Brain</div>
@@ -660,862 +189,13 @@
 
 <div class="mobile-tabs" id="mobile-tabs">
   <button class="mobile-tab-btn active" id="mob-left" onclick="switchMobilePanel('left')">💬 Chat</button>
-  <button class="mobile-tab-btn"        id="mob-menu" onclick="switchMobilePanel('menu')">🍽️ Menu</button>
+  <button class="mobile-tab-btn"        id="mob-menu" onclick="switchMobilePanel('menu')">🍣 Menu</button>
 </div>
 
-<script>
-// ─────────────────────────────────
-// CONFIG
-// ─────────────────────────────────
-// Set your Groq API key below or enter it in the UI key field
-let GROQ_KEY = localStorage.getItem('groq_key') || '';
-const GROQ_MODEL = 'llama-3.3-70b-versatile';
-
-// ─────────────────────────────────
-// REAL MORT SUBITE MENU
-// ─────────────────────────────────
-const MENU = {
-  restaurant: "Mort Subite",
-  tagline: "Austin's Only Belgian Beer Bar",
-  address: "308 Congress Ave, Austin, TX 78701",
-  menu: [
-    // ── TAPAS ──
-    { name:"Croquetas de Jamón Serrano", category:"tapas", description:"Spanish ham croquettes with béchamel", ingredients:["jamón serrano","béchamel","flour","breadcrumbs","egg"], allergens:["gluten","dairy","egg"], gluten_free:false, substitutions:[], price:"$9.99", tags:["popular","Spanish"] },
-    { name:"Croquetas de Pollo", category:"tapas", description:"Chicken croquettes with béchamel", ingredients:["chicken","béchamel","flour","breadcrumbs","egg"], allergens:["gluten","dairy","egg"], gluten_free:false, substitutions:[], price:"$8.99", tags:["Spanish"] },
-    { name:"Tortilla Española", category:"tapas", description:"Spanish omelette with potatoes and onions", ingredients:["egg","potato","onion","olive oil"], allergens:["egg"], gluten_free:true, substitutions:[], price:"$9.99", tags:["vegetarian","gluten-free","classic","Spanish"] },
-    { name:"Beef Bombas", category:"tapas", description:"Crispy fried beef and potato balls with aioli", ingredients:["beef","potato","breadcrumbs","egg","aioli"], allergens:["gluten","egg"], gluten_free:false, substitutions:[], price:"$9.50", tags:["popular","Spanish"] },
-    { name:"Vegan Bombas", category:"tapas", description:"Crispy fried plant-based potato balls", ingredients:["potato","breadcrumbs","plant-based filling"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$9.50", tags:["vegan","Spanish"] },
-    { name:"Patatas Bravas", category:"tapas", description:"Crispy potatoes with spicy brava sauce and aioli", ingredients:["potato","brava sauce","aioli","olive oil"], allergens:["egg"], gluten_free:true, substitutions:[], price:"$9.99", tags:["popular","vegetarian","gluten-free","Spanish"] },
-    { name:"Flemish Frites", category:"tapas", description:"Double-fried Belgian fries with house mayo", ingredients:["potato","oil","house mayo"], allergens:["egg"], gluten_free:true, substitutions:[{option:"no mayo (vegan)",price_change:0}], price:"$9.99", tags:["popular","gluten-free","Belgian"] },
-    { name:"Green Salad", category:"tapas", description:"Fresh mixed greens with vinaigrette", ingredients:["mixed greens","vinaigrette"], allergens:[], gluten_free:true, substitutions:[], price:"$9.00", tags:["light","vegan","gluten-free","vegetarian"] },
-    { name:"Gambas al Ajillo", category:"tapas", description:"Sautéed shrimp in garlic olive oil with chili and parsley", ingredients:["shrimp","garlic","olive oil","chili","parsley"], allergens:["shellfish"], gluten_free:true, substitutions:[], price:"$15.50", tags:["popular","Spanish","gluten-free","signature"] },
-    // ── PAELLA ──
-    { name:"Seafood Paella", category:"paella", description:"Traditional Spanish saffron rice with mixed seafood. Serves 2–3.", ingredients:["rice","shrimp","mussels","squid","saffron","olive oil","tomato"], allergens:["shellfish"], gluten_free:true, substitutions:[], price:"$29.50", tags:["popular","signature","Spanish","gluten-free"] },
-    { name:"Chicken Paella", category:"paella", description:"Classic Spanish saffron rice with chicken and vegetables. Serves 2–3.", ingredients:["rice","chicken","saffron","bell pepper","tomato","olive oil"], allergens:[], gluten_free:true, substitutions:[], price:"$27.50", tags:["popular","Spanish","gluten-free"] },
-    { name:"Vegan Paella", category:"paella", description:"Spanish saffron rice with seasonal vegetables. Serves 2–3.", ingredients:["rice","seasonal vegetables","saffron","olive oil","tomato"], allergens:[], gluten_free:true, substitutions:[], price:"$27.50", tags:["vegan","vegetarian","Spanish","gluten-free"] },
-    // ── FIDEUÀ ──
-    { name:"Seafood Fideuà", category:"fideua", description:"Spanish noodle dish with mixed seafood, served with aioli. Serves 2–3.", ingredients:["fideos noodles","shrimp","mussels","squid","saffron","aioli"], allergens:["gluten","shellfish","egg"], gluten_free:false, substitutions:[], price:"$24.50", tags:["Spanish","signature"] },
-    { name:"Chicken Fideuà", category:"fideua", description:"Spanish noodle dish with chicken and saffron. Serves 2–3.", ingredients:["fideos noodles","chicken","saffron","aioli","tomato"], allergens:["gluten","egg"], gluten_free:false, substitutions:[], price:"$22.50", tags:["Spanish"] },
-    { name:"Vegan Fideuà", category:"fideua", description:"Spanish noodle dish with seasonal vegetables. Serves 2–3.", ingredients:["fideos noodles","seasonal vegetables","saffron","tomato"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$22.50", tags:["vegan","vegetarian","Spanish"] },
-    // ── SANDWICHES ──
-    { name:"Jamón Serrano Sandwich", category:"sandwich", description:"Spanish cured ham on crusty bread. Available in 5-inch ($9.50) or 10-inch ($18).", ingredients:["jamón serrano","bread","olive oil"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$9.50 / $18", tags:["Spanish","classic"] },
-    { name:"Chorizo Español Sandwich", category:"sandwich", description:"Spanish cured chorizo on crusty bread. Available in 5-inch ($8.50) or 10-inch ($16).", ingredients:["chorizo español","bread","olive oil"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$8.50 / $16", tags:["Spanish"] },
-    { name:"Pepito de Ternera", category:"sandwich", description:"Spanish beef tenderloin sandwich with aioli. Available in 5-inch ($9.50) or 10-inch ($18).", ingredients:["beef tenderloin","bread","aioli"], allergens:["gluten","egg"], gluten_free:false, substitutions:[], price:"$9.50 / $18", tags:["Spanish","popular"] },
-    // ── PLATES ──
-    { name:"Charcuterie Plate", category:"plate", description:"Curated selection of cured meats with mustard, cornichons, and bread", ingredients:["cured meats","mustard","cornichons","bread"], allergens:["gluten"], gluten_free:false, substitutions:[{option:"no bread (GF)",price_change:0}], price:"$19.99", tags:["shareable","popular"] },
-    { name:"Cheese Plate", category:"plate", description:"Artisan cheeses with honey, walnuts, and crackers", ingredients:["artisan cheese","honey","walnuts","crackers"], allergens:["dairy","gluten","tree nuts"], gluten_free:false, substitutions:[{option:"no crackers (GF)",price_change:0}], price:"$19.99", tags:["shareable","vegetarian"] },
-    // ── HIGHBALLS ($12) ──
-    { name:"Americano", category:"highball", description:"Vermouth, bitter blend, soda, orange", ingredients:["vermouth","bitter blend","soda","orange"], allergens:[], gluten_free:true, substitutions:[], price:"$12", tags:["cocktail","light","classic"] },
-    { name:"Pimm's Cup", category:"highball", description:"Pimm's, sparkling lemonade, cucumber, mint", ingredients:["pimm's","sparkling lemonade","cucumber","mint"], allergens:[], gluten_free:true, substitutions:[], price:"$12", tags:["cocktail","light","refreshing"] },
-    { name:"Campari + Grapefruit", category:"highball", description:"Campari with sparkling grapefruit — bright and bitter", ingredients:["campari","sparkling grapefruit"], allergens:[], gluten_free:true, substitutions:[], price:"$12", tags:["cocktail","bitter","light"] },
-    { name:"Suze + Tonic", category:"highball", description:"Suze gentian liqueur, tonic, lemon", ingredients:["suze","tonic","lemon"], allergens:[], gluten_free:true, substitutions:[], price:"$12", tags:["cocktail","bitter","light"] },
-    { name:"Fernet + Ginger", category:"highball", description:"Fernet Branca with ginger beer and orange", ingredients:["fernet","ginger beer","orange"], allergens:[], gluten_free:true, substitutions:[], price:"$12", tags:["cocktail","bitter"] },
-    { name:"Spanish G+T", category:"highball", description:"Mahon gin, elderflower tonic, fresh herbs", ingredients:["mahon gin","elderflower tonic","herbs"], allergens:[], gluten_free:true, substitutions:[], price:"$12", tags:["cocktail","popular","gin"] },
-    { name:"Alpine Seltzer", category:"highball", description:"Luxardo del Santo, seltzer, rosemary", ingredients:["luxardo del santo","seltzer","rosemary"], allergens:[], gluten_free:true, substitutions:[], price:"$12", tags:["cocktail","light"] },
-    { name:"Basque Lemonade", category:"highball", description:"Pacharan Atxa, gin, lemonade, mint", ingredients:["pacharan atxa","gin","lemonade","mint"], allergens:[], gluten_free:true, substitutions:[], price:"$12", tags:["cocktail","refreshing"] },
-    // ── SPRITZ ($13) ──
-    { name:"Hugo Spritz", category:"spritz", description:"Elderflower, prosecco, lemon, mint", ingredients:["elderflower liqueur","prosecco","lemon","mint"], allergens:[], gluten_free:true, substitutions:[], price:"$13", tags:["cocktail","light","popular","spritz"] },
-    { name:"Venetian Spritz", category:"spritz", description:"Aperitivo Select, prosecco, orange, olive", ingredients:["aperitivo select","prosecco","orange","olive"], allergens:[], gluten_free:true, substitutions:[], price:"$13", tags:["cocktail","popular","spritz"] },
-    { name:"Pink Lady Spritz", category:"spritz", description:"Ramazzotti Rosato, Peychaud's, prosecco, lemon", ingredients:["ramazzotti rosato","peychaud's","prosecco","lemon"], allergens:[], gluten_free:true, substitutions:[], price:"$13", tags:["cocktail","spritz"] },
-    { name:"Witchy Woman Spritz", category:"spritz", description:"Strega liqueur, prosecco, orange, mint", ingredients:["strega liqueur","prosecco","orange","mint"], allergens:[], gluten_free:true, substitutions:[], price:"$13", tags:["cocktail","spritz"] },
-    // ── AROMATIC ($14) ──
-    { name:"Negroni Blanc", category:"aromatic", description:"London dry gin, Luxardo Bitter Bianco, Atxa Vermut Blanco, grapefruit", ingredients:["london dry gin","luxardo bitter bianco","atxa vermut blanco","grapefruit"], allergens:[], gluten_free:true, substitutions:[], price:"$14", tags:["cocktail","classic","popular"] },
-    { name:"Bol' Fashioned", category:"aromatic", description:"Bols Genever, Bonal Quina, Curaçao, lemon", ingredients:["bols genever","bonal quina","curaçao","lemon"], allergens:[], gluten_free:true, substitutions:[], price:"$14", tags:["cocktail","spirit-forward"] },
-    // ── CHAUDRONNIERS ──
-    { name:"Bavik Super Pils + Amer Picon", category:"chaudronnier", description:"Crisp Belgian pilsner paired with Amer Picon digestif", ingredients:["bavik super pils","amer picon"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$11", tags:["Belgian","beer cocktail","classic"] },
-    { name:"Chimay Cinq Cents + Belle de Brillet", category:"chaudronnier", description:"Chimay Tripel with Belle de Brillet pear cognac", ingredients:["chimay cinq cents","belle de brillet"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$16", tags:["Belgian","beer cocktail","premium"] },
-    { name:"St. Bernardus Abt 12 + Pasubio Amaro", category:"chaudronnier", description:"St. Bernardus Quad with Pasubio Alpine amaro", ingredients:["st. bernardus abt 12","pasubio amaro"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$15", tags:["Belgian","beer cocktail","premium"] },
-    { name:"Duvel Golden Ale + Kübler Absinthe", category:"chaudronnier", description:"Duvel golden ale paired with Kübler absinthe", ingredients:["duvel golden ale","kübler absinthe"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$13", tags:["Belgian","beer cocktail"] },
-    // ── BEER ──
-    { name:"Bier Picon", category:"beer", description:"Belgian pilsner with Amer Picon — a classic Brussels bistro order", ingredients:["beer","amer picon"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$10", tags:["Belgian","classic"] },
-    { name:"Bavik Super Pils", category:"beer", description:"The house pilsner. Crisp Belgian lager. 5.2% ABV.", ingredients:["barley","hops","water","yeast"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$8", tags:["popular","lager","session","Belgian"] },
-    { name:"Delirium Tremens", category:"beer", description:"Famous Belgian golden ale. 8.5% ABV. Pink elephant.", ingredients:["barley","hops","water","yeast"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$13", tags:["popular","Belgian","strong ale"] },
-    { name:"St. Feuillien Grand Cru", category:"beer", description:"Rich Belgian quad. 9.5% ABV. Complex and warming.", ingredients:["barley","hops","water","yeast","candi sugar"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$15", tags:["Belgian","premium","quad"] },
-    { name:"La Chouffe Blond", category:"beer", description:"Hoppy Belgian blonde with coriander. 8% ABV.", ingredients:["barley","hops","coriander","water","yeast"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$11", tags:["popular","Belgian","blonde"] },
-    { name:"Kwak Amber Ale", category:"beer", description:"Full-bodied Belgian amber. 8.4% ABV. Served in signature glass.", ingredients:["barley","hops","water","yeast"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$18", tags:["Belgian","signature","amber"] },
-    { name:"Tripel Karmeliet", category:"beer", description:"Triple grain Belgian Tripel. 8.4% ABV. Banana and vanilla notes.", ingredients:["barley","wheat","oats","hops","water","yeast"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$16", tags:["Belgian","tripel","premium"] },
-    { name:"Lindemans Framboise Lambic", category:"beer", description:"Sweet raspberry lambic. 2.5% ABV. Light and fruity.", ingredients:["wheat","barley","raspberries","wild yeast"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$11", tags:["Belgian","lambic","sour","fruit"] },
-    { name:"Maredsous Brune", category:"beer", description:"Abbey brown ale. 8% ABV. Malty, caramel, dark fruit.", ingredients:["barley","hops","water","yeast"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$11", tags:["Belgian","abbey","brown ale"] },
-    { name:"Brugse Zot Blonde", category:"beer", description:"From the last brewery in Bruges. 6% ABV. Hoppy and bright.", ingredients:["barley","hops","water","yeast"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$13", tags:["Belgian","blonde","popular"] },
-    { name:"Houblon Chouffe IPA", category:"beer", description:"Belgian IPA from d'Achouffe. 9% ABV. Bold and hoppy.", ingredients:["barley","hops","water","yeast"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$11", tags:["Belgian","IPA"] },
-    { name:"Duchesse de Bourgogne", category:"beer", description:"Flemish red-brown ale. 6.2% ABV. Sour, cherries, oak.", ingredients:["barley","wheat","hops","wild yeast"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$11", tags:["Belgian","sour","red ale"] },
-    { name:"Saison Dupont", category:"beer", description:"Classic farmhouse saison. 6.5% ABV. Spicy and dry.", ingredients:["barley","hops","water","yeast"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$12", tags:["Belgian","saison","classic"] },
-    { name:"Estrella Galicia", category:"beer", description:"Spanish lager. 5.5% ABV. Clean and refreshing.", ingredients:["barley","hops","water","yeast"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$7", tags:["lager","Spanish","session"] },
-    { name:"Liefmans Fruitesse", category:"beer", description:"Belgian fruit sour. 3.8% ABV. Mixed berry blend.", ingredients:["barley","wheat","mixed berries","wild yeast"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$11", tags:["Belgian","sour","fruit"] },
-    { name:"Fantome Pissenlit", category:"beer", description:"Rare Belgian saison with dandelion. 8% ABV. Funky and wild.", ingredients:["barley","dandelion","hops","wild yeast"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$14", tags:["Belgian","saison","rare","premium"] },
-    { name:"St. Bernardus Abt 12", category:"beer", description:"Legendary Belgian quad. 10.5% ABV. Rich, dark fruit, warming.", ingredients:["barley","hops","water","yeast","candi sugar"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$12", tags:["Belgian","quad","premium","popular"] },
-    { name:"St. Bernardus Tripel", category:"beer", description:"Belgian Tripel. 8% ABV. Fruity, spiced, golden.", ingredients:["barley","hops","water","yeast"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$12", tags:["Belgian","tripel"] },
-    { name:"St. Bernardus Wit", category:"beer", description:"Belgian witbier. 5.5% ABV. Citrus, coriander, wheat.", ingredients:["barley","wheat","coriander","orange peel","hops","water","yeast"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$12", tags:["Belgian","wit","light"] },
-    { name:"Chimay Cinq Cents (Tripel)", category:"beer", description:"White Chimay. 8% ABV. Fruity, spiced Trappist tripel.", ingredients:["barley","hops","water","yeast"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$12", tags:["Belgian","Trappist","tripel","popular"] },
-    { name:"Chimay Grande Réserve (Blue)", category:"beer", description:"Blue Chimay. 9% ABV. Dark, rich, chocolate Trappist.", ingredients:["barley","hops","water","yeast","candi sugar"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$13", tags:["Belgian","Trappist","dark","popular"] },
-    { name:"Chimay Septante Blonde", category:"beer", description:"70th anniversary Chimay golden ale. 7% ABV. Light and hoppy.", ingredients:["barley","hops","water","yeast"], allergens:["gluten"], gluten_free:false, substitutions:[], price:"$13", tags:["Belgian","Trappist","blonde"] },
-    // ── WINE ──
-    { name:"Jacques Pelvas Brut Blanc de Blancs", category:"wine", description:"French sparkling wine, all Chardonnay, clean and bright", ingredients:["chardonnay"], allergens:[], gluten_free:true, substitutions:[], price:"$10", tags:["wine","sparkling","French"] },
-    { name:"La Quilla Muscadet", category:"wine", description:"Loire Valley white, mineral, dry and light", ingredients:["melon de bourgogne"], allergens:[], gluten_free:true, substitutions:[], price:"$11", tags:["wine","white","French","light"] },
-    { name:"Basa Lore Txakoli Rosé", category:"wine", description:"Basque sparkling rosé, fresh and bone dry", ingredients:["hondarribi beltza"], allergens:[], gluten_free:true, substitutions:[], price:"$14", tags:["wine","rosé","Spanish","sparkling"] },
-    { name:"Can Sumoi Blanc Garnatxa", category:"wine", description:"Catalan white Garnacha, textured and aromatic", ingredients:["garnacha blanca"], allergens:[], gluten_free:true, substitutions:[], price:"$14", tags:["wine","white","Spanish"] },
-    { name:"Can Sumoi Garnatxa", category:"wine", description:"Catalan red Garnacha, juicy and medium-bodied", ingredients:["garnacha"], allergens:[], gluten_free:true, substitutions:[], price:"$14", tags:["wine","red","Spanish"] },
-    { name:"Clos de Tefall Grenache", category:"wine", description:"Rich Spanish Grenache, full and warming", ingredients:["grenache"], allergens:[], gluten_free:true, substitutions:[], price:"$16", tags:["wine","red","Spanish","premium"] },
-    // ── VERMOUTH ──
-    { name:"Lustau Rojo", category:"vermouth", description:"Spanish sweet red vermouth, rich and caramel-forward", ingredients:["wine","botanicals"], allergens:[], gluten_free:true, substitutions:[], price:"$7", tags:["vermouth","Spanish","classic"] },
-    { name:"Lustau Blanco", category:"vermouth", description:"Spanish white vermouth, dry and floral", ingredients:["wine","botanicals"], allergens:[], gluten_free:true, substitutions:[], price:"$7", tags:["vermouth","Spanish"] },
-    { name:"Axta Secco", category:"vermouth", description:"Basque dry vermouth", ingredients:["wine","botanicals"], allergens:[], gluten_free:true, substitutions:[], price:"$11", tags:["vermouth","Spanish","dry"] },
-    { name:"Axta Blanco", category:"vermouth", description:"Basque white vermouth", ingredients:["wine","botanicals"], allergens:[], gluten_free:true, substitutions:[], price:"$11", tags:["vermouth","Spanish"] },
-    { name:"Punt e Mes", category:"vermouth", description:"Italian semi-sweet vermouth with a bitter edge", ingredients:["wine","botanicals"], allergens:[], gluten_free:true, substitutions:[], price:"$10", tags:["vermouth","Italian","bitter"] },
-    { name:"Contratto Americano", category:"vermouth", description:"Italian-style Americano aperitif", ingredients:["wine","botanicals"], allergens:[], gluten_free:true, substitutions:[], price:"$9", tags:["vermouth","Italian","aperitif"] },
-    { name:"Carpano Secco", category:"vermouth", description:"Dry Italian vermouth", ingredients:["wine","botanicals"], allergens:[], gluten_free:true, substitutions:[], price:"$9", tags:["vermouth","Italian"] },
-    { name:"Bordiga Dry", category:"vermouth", description:"Dry Piedmontese vermouth", ingredients:["wine","botanicals"], allergens:[], gluten_free:true, substitutions:[], price:"$11", tags:["vermouth","Italian","dry"] },
-    { name:"Lacuesta Reserva Rojo", category:"vermouth", description:"Spanish Rioja-based reserve vermouth", ingredients:["wine","botanicals"], allergens:[], gluten_free:true, substitutions:[], price:"$11", tags:["vermouth","Spanish","premium"] },
-    // ── NON-ALCOHOLIC ──
-    { name:"☕ Cappuccino", category:"non_alcoholic", description:"Double espresso with velvety steamed milk and thin foam. A Mort Subite staple.", ingredients:["espresso","milk"], allergens:["dairy"], gluten_free:true, substitutions:[{option:"oat milk",price_change:1},{option:"almond milk",price_change:1},{option:"extra shot",price_change:0.75}], price:"$5", tags:["coffee","featured","non-alcoholic","popular"] },
-    { name:"Sparkling Water", category:"non_alcoholic", description:"San Pellegrino 500ml", ingredients:["water"], allergens:[], gluten_free:true, substitutions:[], price:"$4", tags:["light","non-alcoholic","gluten-free","vegan"] },
-  ]
-};
-
-// ─────────────────────────────────
-// CATEGORY LABELS
-// ─────────────────────────────────
-const CAT_LABELS = {
-  tapas:        '🫒 Tapas',
-  paella:       '🥘 Paella',
-  fideua:       '🍜 Fideuà',
-  sandwich:     '🥖 Sandwiches',
-  plate:        '🧀 Plates',
-  highball:     '🥃 Highballs — $12',
-  spritz:       '🍾 Spritz — $13',
-  aromatic:     '🍸 Aromatic — $14',
-  chaudronnier: '🍺 Chaudronniers',
-  beer:         '🍺 Beer',
-  wine:         '🍷 Wine',
-  vermouth:     '🫗 Vermouth',
-  non_alcoholic:'☕ Non-Alcoholic'
-};
-
-// ─────────────────────────────────
-// SYSTEM PROMPT
-// ─────────────────────────────────
-function buildSystemPrompt() {
-  return `You are the AI assistant for Mort Subite, Austin's only Belgian beer bar at 308 Congress Ave.
-You know the entire menu below. Be concise, friendly, and accurate.
-For allergen/dietary questions: be precise, always add "confirm with kitchen for cross-contamination."
-Keep responses short (2–4 sentences max unless listing items). Never invent items not in the menu.
-Note: paella and fideuà serve 2–3 people. Sandwiches come in 5" and 10".
-
-MENU:
-${JSON.stringify(MENU, null, 2)}`;
-}
-
-// ─────────────────────────────────
-// STATE
-// ─────────────────────────────────
-let currentMode  = 'trainee';
-let subMode      = 'assist';
-let convHistory  = [];
-let demoRunning  = false;
-let editingIndex = -1;
-let menuView     = 'cards';
-let mobilePanel  = 'left';
-
-// ─────────────────────────────────
-// GROQ
-// ─────────────────────────────────
-async function groq(messages, temperature=0.4, maxTokens=300) {
-  const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method:'POST',
-    headers:{'Authorization':`Bearer ${GROQ_KEY}`,'Content-Type':'application/json'},
-    body: JSON.stringify({ model:GROQ_MODEL, messages, temperature, max_tokens:maxTokens })
-  });
-  if (!r.ok) throw new Error(await r.text());
-  return (await r.json()).choices[0].message.content;
-}
-
-async function askMenu(q) {
-  const msgs = [{role:'system',content:buildSystemPrompt()},...convHistory,{role:'user',content:q}];
-  const reply = await groq(msgs);
-  convHistory.push({role:'user',content:q});
-  convHistory.push({role:'assistant',content:reply});
-  return reply;
-}
-
-async function checkServerAnswer(question, answer) {
-  const p = `Customer asked: "${question}"\nServer answered: "${answer}"\n\nEvaluate against the menu. Reply:\n1. CORRECT or INCORRECT (first word on first line)\n2. One sentence why\n3. If incorrect: the correct answer in one sentence.\nNo preamble.`;
-  return groq([{role:'system',content:buildSystemPrompt()},{role:'user',content:p}], 0.2, 200);
-}
-
-// ─────────────────────────────────
-// MODES
-// ─────────────────────────────────
-function setMode(m) {
-  currentMode = m;
-  ['trainee','demo','manager'].forEach(id => {
-    document.getElementById('mb-'+id).className = 'mode-btn'+(m===id?' active':'');
-  });
-  document.getElementById('trainee-wrap').style.display = m==='trainee' ? 'flex' : 'none';
-  document.getElementById('demo-wrap').style.display    = m==='demo'    ? 'flex' : 'none';
-  document.getElementById('manager-wrap').style.display = m==='manager' ? 'flex' : 'none';
-  const leftBtn = document.getElementById('mob-left');
-  leftBtn.textContent = m==='trainee' ? '💬 Chat' : m==='demo' ? '▶ Demo' : '⚙ Manage';
-  if (m==='manager') renderMgrList();
-}
-
-function setSubMode(sm) {
-  subMode = sm;
-  document.getElementById('sub-assist').className  = 'mode-btn'+(sm==='assist' ?' active':'');
-  document.getElementById('sub-trainer').className = 'mode-btn'+(sm==='trainer'?' active':'');
-  document.getElementById('trainer-sub').style.display = sm==='trainer' ? 'block' : 'none';
-  document.getElementById('user-input').placeholder = sm==='trainer'
-    ? 'Enter customer question to check…' : 'Ask about the menu…';
-}
-
-// ─────────────────────────────────
-// TRAINEE — CHAT
-// ─────────────────────────────────
-const $msgs = () => document.getElementById('messages');
-
-function addMsg(avatar, avClass, label, html, bubClass='') {
-  const el = document.createElement('div');
-  el.className = 'msg';
-  el.innerHTML = `<div class="msg-avatar ${avClass}">${avatar}</div>
-    <div class="msg-content">
-      <div class="msg-label">${label}</div>
-      <div class="msg-bubble ${bubClass}">${html}</div>
-    </div>`;
-  $msgs().appendChild(el); $msgs().scrollTop = 9999;
-}
-
-function addTyping(container) {
-  const c = container||$msgs();
-  const el = document.createElement('div');
-  el.className='msg'; el.id='typing-'+c.id;
-  el.innerHTML = `<div class="msg-avatar av-ai">🤖</div>
-    <div class="msg-content"><div class="msg-label">AI</div>
-    <div class="typing-indicator"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
-  c.appendChild(el); c.scrollTop=9999;
-}
-function removeTyping(container) {
-  const c = container||$msgs();
-  const el = document.getElementById('typing-'+c.id);
-  if (el) el.remove();
-}
-
-const fmt = t => t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
-
-async function sendMsg() {
-  const inp = document.getElementById('user-input');
-  const txt = inp.value.trim(); if (!txt) return;
-  inp.value = '';
-  if (subMode==='trainer') {
-    document.getElementById('trainer-q-text').textContent = txt;
-    document.getElementById('trainer-ans').focus();
-    return;
-  }
-  addMsg('👤','av-customer','You', txt, 'bubble-customer');
-  document.getElementById('send-btn').disabled = true;
-  addTyping();
-  try {
-    const reply = await askMenu(txt);
-    removeTyping();
-    addMsg('🤖','av-ai','AI Assistant', fmt(reply), 'bubble-ai');
-  } catch(e) {
-    removeTyping();
-    addMsg('⚠️','av-system','Error', e.message, 'bubble-system');
-  }
-  document.getElementById('send-btn').disabled = false;
-}
-
-async function checkAnswer() {
-  const q   = document.getElementById('trainer-q-text').textContent;
-  const ans = document.getElementById('trainer-ans').value.trim();
-  if (!ans || q.startsWith('Type a customer')) return;
-  document.getElementById('trainer-ans').value = '';
-  addMsg('🧑‍💼','av-server','Server Answer', `"${ans}"`, 'bubble-customer');
-  addTyping();
-  try {
-    const result = await checkServerAnswer(q, ans);
-    removeTyping(); renderVerdict(result, $msgs());
-  } catch(e) {
-    removeTyping(); addMsg('⚠️','av-system','Error', e.message, 'bubble-system');
-  }
-}
-
-function renderVerdict(text, container) {
-  const lines = text.trim().split('\n').filter(Boolean);
-  const correct = lines[0].trim().toUpperCase().startsWith('CORRECT') && !lines[0].trim().toUpperCase().startsWith('INCORRECT');
-  const el = document.createElement('div'); el.className='msg';
-  el.innerHTML = `<div class="msg-avatar av-trainer">🤖</div>
-    <div class="msg-content"><div class="msg-label">Trainer AI</div>
-    <div class="msg-bubble bubble-ai ${correct?'bubble-correct':'bubble-wrong'}">
-      <div class="verdict ${correct?'correct':'wrong'}">${correct?'✅':'❌'} ${lines[0].trim()}</div>
-      <div style="font-size:13px;line-height:1.6">${lines.slice(1).join('<br>')}</div>
-    </div></div>`;
-  container.appendChild(el); container.scrollTop=9999;
-}
-
-async function triggerCap() {
-  document.getElementById('user-input').value = "I'll take a cappuccino. What goes with it?";
-  await sendMsg();
-}
-
-function resetChat() {
-  convHistory=[];
-  document.getElementById('messages').innerHTML='';
-  document.getElementById('trainer-q-text').textContent='Type a customer question in the box below, then enter the server\'s answer to evaluate it.';
-  initWelcome();
-}
-
-function initWelcome() {
-  addMsg('🍺','av-system','System',
-    `Menu Brain loaded — <strong>Mort Subite</strong>, 308 Congress Ave, Austin TX.<br>
-     <strong style="color:var(--accent)">${MENU.menu.length} items</strong> · tapas · paella · fideuà · Belgian beers · cocktails · wine · vermouth.<br><br>
-     Switch to <em>Check Answer</em> to test server knowledge, or type any menu question below.`,
-    'bubble-system');
-}
-
-// ─────────────────────────────────
-// DEMO
-// ─────────────────────────────────
-function demoMsg(avatar, avClass, label, html, bubClass='') {
-  const c = document.getElementById('demo-messages');
-  const el = document.createElement('div'); el.className='msg';
-  el.innerHTML = `<div class="msg-avatar ${avClass}">${avatar}</div>
-    <div class="msg-content"><div class="msg-label">${label}</div>
-    <div class="msg-bubble ${bubClass}">${html}</div></div>`;
-  c.appendChild(el); c.scrollTop=9999;
-}
-const demoSys = html => demoMsg('⚡','av-system','System', html, 'bubble-system');
-const sleep = ms => new Promise(r=>setTimeout(r,ms));
-
-function setDemoStep(n) {
-  for(let i=1;i<=6;i++) {
-    const el=document.getElementById('d'+i); if(!el) continue;
-    el.className='step-dot'+(i<n?' done':i===n?' active':'');
-  }
-}
-
-async function runDemo() {
-  if (demoRunning) return;
-  demoRunning = true;
-  const btn = document.getElementById('run-demo-btn');
-  btn.disabled=true; btn.textContent='Running…';
-  document.getElementById('demo-messages').innerHTML='';
-  document.getElementById('demo-step-bar').style.display='flex';
-
-  const dh = [];
-  async function demoAsk(q) {
-    const msgs=[{role:'system',content:buildSystemPrompt()},...dh,{role:'user',content:q}];
-    const reply=await groq(msgs); dh.push({role:'user',content:q}); dh.push({role:'assistant',content:reply});
-    return reply;
-  }
-
-  // Step 1 — Load
-  setDemoStep(1);
-  demoSys('<div style="display:flex;align-items:center;gap:8px"><div style="width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0"></div>Loading Mort Subite menu brain…</div>');
-  await sleep(700);
-  switchMenuTab('json'); await sleep(800); switchMenuTab('cards');
-  document.querySelectorAll('.menu-card').forEach((c,i)=>{
-    setTimeout(()=>c.classList.add('hl'),i*40);
-    setTimeout(()=>c.classList.remove('hl'),i*40+700);
-  });
-  document.getElementById('demo-messages').querySelector('.msg-bubble').innerHTML =
-    `✅ Menu brain loaded — <strong style="color:var(--accent)">${MENU.menu.length} items</strong> across 13 categories. Tapas · paella · cocktails · Belgian beers · wine.`;
-  await sleep(600);
-
-  // Step 2 — Gluten-free
-  setDemoStep(2);
-  demoMsg('👤','av-customer','Customer',"I can't have gluten. What can I get?",'bubble-customer');
-  await sleep(400); addTyping(document.getElementById('demo-messages'));
-  let r2; try { r2=await demoAsk("I can't have gluten. What can I get?"); }
-  catch { r2="Great options for you: **Gambas al Ajillo** ($15.50), **Patatas Bravas** ($9.99), **Tortilla Española** ($9.99), **Green Salad** ($9), and all three **Paellas** ($27.50–$29.50) are naturally gluten-free. The **Cappuccino** ($5) and wines are GF too. Always confirm with our kitchen."; }
-  removeTyping(document.getElementById('demo-messages'));
-  demoMsg('🤖','av-ai','AI Assistant', fmt(r2), 'bubble-ai');
-  highlightItem('Tortilla Española'); await sleep(1000);
-
-  // Step 3 — Light + popular
-  setDemoStep(3);
-  demoMsg('👤','av-customer','Customer',"I like something light and popular — any suggestions?",'bubble-customer');
-  await sleep(400); addTyping(document.getElementById('demo-messages'));
-  let r3; try { r3=await demoAsk("I like something light and popular — any suggestions?"); }
-  catch { r3="For light and popular: the **Green Salad** ($9) is crisp and vegan, **Patatas Bravas** ($9.99) is a crowd favorite, and the **Hugo Spritz** ($13) — elderflower, prosecco, mint — is the lightest cocktail on the menu."; }
-  removeTyping(document.getElementById('demo-messages'));
-  demoMsg('🤖','av-ai','AI Assistant', fmt(r3), 'bubble-ai');
-  await sleep(1000);
-
-  // Step 4 — Cappuccino ☕
-  setDemoStep(4);
-  demoMsg('👤','av-customer','Customer',"I'll take a cappuccino ☕ — what pairs well with it?",'bubble-customer');
-  highlightItem('☕ Cappuccino');
-  await sleep(400); addTyping(document.getElementById('demo-messages'));
-  let r4; try { r4=await demoAsk("I'll take a cappuccino. What pairs well with it?"); }
-  catch { r4="The **Croquetas de Jamón Serrano** ($9.99) pair perfectly — crispy, warm, excellent with coffee. Or the **Cheese Plate** ($19.99) for something to share. Oat or almond milk available in your cap for just +$1."; }
-  removeTyping(document.getElementById('demo-messages'));
-  demoMsg('🤖','av-ai','AI Assistant', fmt(r4), 'bubble-ai');
-  await sleep(1000);
-
-  // Step 5 — Trainer check
-  setDemoStep(5);
-  demoSys('⚙️ <strong>Trainer check</strong> — evaluating a server answer…');
-  demoMsg('🧑‍💼','av-server','Server (answer to check)', '"Everything here is gluten free."', 'bubble-wrong');
-  await sleep(500); addTyping(document.getElementById('demo-messages'));
-  let r5; try { r5=await checkServerAnswer("What's gluten free on the menu?","Everything here is gluten free."); }
-  catch { r5="INCORRECT\nSeveral items contain gluten: croquetas, bombas, fideuà, sandwiches, and all beers contain barley.\nCorrect answer: Gluten-free options include the paellas, Gambas al Ajillo, Tortilla Española, Patatas Bravas, Flemish Frites (no croutons), Green Salad, wines, vermouths, cocktails, and the Cappuccino — always confirm with kitchen for cross-contamination."; }
-  removeTyping(document.getElementById('demo-messages'));
-  renderVerdict(r5, document.getElementById('demo-messages'));
-  await sleep(1000);
-
-  // Step 6 — Milk swap assist
-  setDemoStep(6);
-  demoSys('⚙️ Back to <strong>Assist</strong> — live customer request…');
-  demoMsg('👤','av-customer','Customer',"Can I swap the milk in my cappuccino?",'bubble-customer');
-  highlightItem('☕ Cappuccino');
-  await sleep(400); addTyping(document.getElementById('demo-messages'));
-  let r6; try { r6=await demoAsk("Can I swap the milk in my cappuccino?"); }
-  catch { r6="Yes! We offer **oat milk** or **almond milk** — both +$1. Just let your server know when ordering."; }
-  removeTyping(document.getElementById('demo-messages'));
-  demoMsg('🤖','av-ai','AI Assistant', fmt(r6), 'bubble-ai');
-  for(let i=1;i<=6;i++) document.getElementById('d'+i).className='step-dot done';
-  demoSys('✅ <strong>Demo complete.</strong> All 6 scenarios passed — Menu Brain is live.');
-
-  demoRunning=false; btn.disabled=false; btn.textContent='Run Demo Again ☕';
-}
-
-// ─────────────────────────────────
-// MANAGER
-// ─────────────────────────────────
-function renderMgrList() {
-  const q = (document.getElementById('mgr-search').value||'').toLowerCase();
-  const list = document.getElementById('mgr-list');
-  list.innerHTML='';
-
-  const grouped={};
-  MENU.menu.forEach((item,idx)=>{
-    if (q && !item.name.toLowerCase().includes(q) && !item.category.toLowerCase().includes(q) && !item.description.toLowerCase().includes(q)) return;
-    (grouped[item.category]=grouped[item.category]||[]).push({item,idx});
-  });
-
-  let count=0;
-  Object.entries(grouped).forEach(([cat,entries])=>{
-    const lbl=document.createElement('div'); lbl.className='mgr-cat-label';
-    lbl.textContent=CAT_LABELS[cat]||cat; list.appendChild(lbl);
-    entries.forEach(({item,idx})=>{
-      count++;
-      const el=document.createElement('div'); el.className='mgr-item';
-      el.innerHTML=`<div class="mgr-item-info">
-        <div class="mgr-item-name">${item.name} <span style="color:var(--accent)">${item.price}</span></div>
-        <div class="mgr-item-sub">${item.description.substring(0,55)}${item.description.length>55?'…':''}</div>
-      </div>
-      <div class="mgr-item-actions">
-        <button class="btn-edit" onclick="openEditor(${idx});event.stopPropagation()">Edit</button>
-        <button class="btn-del"  onclick="deleteItem(${idx});event.stopPropagation()">Del</button>
-      </div>`;
-      list.appendChild(el);
-    });
-  });
-  if (!count) list.innerHTML=`<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">No items match "${q}"</div>`;
-  renderMenu();
-}
-
-function openEditor(idx) {
-  editingIndex=idx;
-  const item=idx>=0?MENU.menu[idx]:null;
-  document.getElementById('editor-title').textContent = item?`Edit — ${item.name}`:'Add New Item';
-  document.getElementById('f-name').value        = item?.name        ||'';
-  document.getElementById('f-price').value       = item?.price       ||'';
-  document.getElementById('f-category').value    = item?.category    ||'tapas';
-  document.getElementById('f-desc').value        = item?.description ||'';
-  document.getElementById('f-ingredients').value = (item?.ingredients||[]).join(', ');
-  document.getElementById('f-allergens').value   = (item?.allergens  ||[]).join(', ');
-  const gfVal=item?.gluten_free===true?'true':item?.gluten_free===false?'false':'ask';
-  document.getElementById('f-gf').value = gfVal;
-  document.getElementById('f-tags').value = (item?.tags||[]).join(', ');
-  const subsText=(item?.substitutions||[]).map(s=>{
-    const p=s.price_change!==0?` ($${s.price_change>0?'+':''}${s.price_change})`:' ($0)';
-    return `${s.option}${p}`;
-  }).join('\n');
-  document.getElementById('f-subs').value=subsText;
-  document.getElementById('mgr-editor').style.display='flex';
-}
-
-function closeEditor() { document.getElementById('mgr-editor').style.display='none'; }
-
-function saveItem() {
-  const parseList=id=>document.getElementById(id).value.split(',').map(s=>s.trim()).filter(Boolean);
-  const parseSubs=()=>document.getElementById('f-subs').value.split('\n').map(line=>{
-    line=line.trim(); if(!line) return null;
-    const m=line.match(/^(.+?)\s*\(\s*([+-]?\$?[\d.]+)\s*\)$/);
-    if(m){ const pc=parseFloat(m[2].replace('$','').replace('+','')); return {option:m[1].trim(),price_change:isNaN(pc)?0:pc}; }
-    return {option:line,price_change:0};
-  }).filter(Boolean);
-  const gfRaw=document.getElementById('f-gf').value;
-  const item={
-    name:        document.getElementById('f-name').value.trim(),
-    category:    document.getElementById('f-category').value,
-    description: document.getElementById('f-desc').value.trim(),
-    ingredients: parseList('f-ingredients'),
-    allergens:   parseList('f-allergens'),
-    gluten_free: gfRaw==='true'?true:gfRaw==='false'?false:'ask',
-    substitutions: parseSubs(),
-    price:       document.getElementById('f-price').value.trim(),
-    tags:        parseList('f-tags')
-  };
-  if(!item.name||!item.price){ alert('Name and price are required.'); return; }
-  if(editingIndex>=0) MENU.menu[editingIndex]=item; else MENU.menu.push(item);
-  closeEditor(); renderMgrList();
-  showToast(editingIndex>=0?`"${item.name}" updated.`:`"${item.name}" added.`);
-}
-
-function deleteItem(idx) {
-  if(!confirm(`Delete "${MENU.menu[idx].name}"?`)) return;
-  const name=MENU.menu[idx].name;
-  MENU.menu.splice(idx,1);
-  renderMgrList(); showToast(`"${name}" removed.`);
-}
-
-function showToast(msg) {
-  let t=document.getElementById('toast');
-  if(!t){ t=document.createElement('div'); t.id='toast';
-    t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;padding:8px 18px;border-radius:8px;font-size:13px;font-weight:700;z-index:999;pointer-events:none;transition:opacity .3s';
-    document.body.appendChild(t); }
-  t.textContent=msg; t.style.opacity='1';
-  clearTimeout(t._to); t._to=setTimeout(()=>t.style.opacity='0',2200);
-}
-
-// ─────────────────────────────────
-// MENU PANEL (right)
-// ─────────────────────────────────
-function toggleMenuView() { switchMenuTab(menuView==='cards'?'json':'cards'); }
-function switchMenuTab(v) {
-  menuView=v;
-  document.getElementById('tab-cards').className='menu-tab'+(v==='cards'?' active':'');
-  document.getElementById('tab-json').className ='menu-tab'+(v==='json' ?' active':'');
-  renderMenu();
-}
-
-function highlightItem(name) {
-  document.querySelectorAll('.menu-card').forEach(c=>{
-    if(c.dataset.name===name){
-      c.classList.add('hl');
-      c.scrollIntoView({behavior:'smooth',block:'nearest'});
-      setTimeout(()=>c.classList.remove('hl'),1500);
-    }
-  });
-}
-
-function renderMenu() {
-  const el=document.getElementById('menu-content');
-  if(menuView==='json'){ el.innerHTML=`<div class="json-view">${syntaxHL(JSON.stringify(MENU,null,2))}</div>`; return; }
-  const grouped={};
-  MENU.menu.forEach(item=>{ (grouped[item.category]=grouped[item.category]||[]).push(item); });
-  let html='';
-  Object.entries(grouped).forEach(([cat,items])=>{
-    html+=`<div class="menu-cat-label">${CAT_LABELS[cat]||cat}</div>`;
-    items.forEach(item=>{
-      const gfTag=item.gluten_free===true?`<span class="tag tag-gf">GF</span>`
-        :item.gluten_free===false?`<span class="tag tag-no">gluten</span>`
-        :`<span class="tag tag-ask">GF ask</span>`;
-      const popTag  =item.tags.includes('popular')?`<span class="tag tag-pop">popular</span>`:'';
-      const lightTag=item.tags.includes('light')  ?`<span class="tag tag-light">light</span>`:'';
-      const subTag  =item.substitutions.length>0  ?`<span class="tag tag-sub">subs</span>`:'';
-      html+=`<div class="menu-card" data-name="${item.name}">
-        <div class="menu-card-row"><div class="menu-card-name">${item.name}</div><div class="menu-card-price">${item.price}</div></div>
-        <div class="menu-card-desc">${item.description}</div>
-        <div class="menu-card-tags">${gfTag}${popTag}${lightTag}${subTag}</div>
-      </div>`;
-    });
-  });
-  el.innerHTML=html;
-}
-
-function syntaxHL(json) {
-  return json.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,m=>{
-      let c='jn';
-      if(/^"/.test(m)) c=/:$/.test(m)?'jk':'js';
-      else if(/true/.test(m)) c='jt'; else if(/false/.test(m)) c='jf'; else if(/null/.test(m)) c='jp';
-      return `<span class="${c}">${m}</span>`;
-    });
-}
-
-// ─────────────────────────────────
-// MOBILE
-// ─────────────────────────────────
-function switchMobilePanel(p) {
-  mobilePanel=p;
-  document.getElementById('mob-left').className='mobile-tab-btn'+(p==='left'?' active':'');
-  document.getElementById('mob-menu').className='mobile-tab-btn'+(p==='menu'?' active':'');
-  document.getElementById('left-panel').classList.toggle('hidden',p!=='left');
-  document.getElementById('menu-panel').classList.toggle('hidden',p!=='menu');
-}
-
-// ─────────────────────────────────
-// API KEY
-// ─────────────────────────────────
-function saveKey(val) {
-  GROQ_KEY = val.trim();
-  localStorage.setItem('groq_key', GROQ_KEY);
-}
-
-// ─────────────────────────────────
-// MANAGER TABS
-// ─────────────────────────────────
-let mgrTab = 'items';
-function switchMgrTab(t) {
-  mgrTab = t;
-  document.getElementById('mgr-tab-items').className   = 'mgr-mode-tab'+(t==='items'  ?' active':'');
-  document.getElementById('mgr-tab-reviews').className = 'mgr-mode-tab'+(t==='reviews'?' active':'');
-  document.getElementById('reviews-panel').style.display  = t==='reviews' ? 'flex'  : 'none';
-  document.getElementById('mgr-toolbar').style.display    = t==='items'   ? 'flex'  : 'none';
-  document.getElementById('mgr-list').style.display       = t==='items'   ? 'flex'  : 'none';
-  document.getElementById('mgr-editor').style.display     = 'none';
-}
-
-// ─────────────────────────────────
-// REVIEWS AI ANALYSIS
-// ─────────────────────────────────
-const REVIEW_SUMMARY = `Mort Subite Austin review data (847 reviews, 4.7★ avg, 98% recommend):
-TOP ISSUES: (1) Parking friction — no guidance communicated, 5+ reviews mention it as a barrier.
-(2) Slow acknowledgment on quiet shifts — 5-min wait documented on Monday evening.
-(3) Food service info gap — customers unsure what food is available after food truck changes.
-(4) Music volume inconsistency — 2+ reviews say it gets too loud for conversation.
-(5) Service inconsistency on slow shifts vs. peak hours — BeerAdvocate notes 3.75/5 on service.
-TOP STRENGTHS: Expert staff knowledge (40%+ of reviews), Belgian beer curation (90%+), atmosphere (85%+), owner presence, named stars Piper/Adam/MG.
-OPPORTUNITIES: Consultative selling, non-beer customer handling, sampling programs.`;
-
-async function runReviewAnalysis() {
-  const btn = document.getElementById('ai-analyze-btn');
-  const out = document.getElementById('ai-analysis-output');
-  btn.disabled = true; btn.textContent = '⏳ Analyzing…';
-  out.style.display = 'none';
-
-  try {
-    const reply = await groq([
-      { role:'system', content:'You are a restaurant operations consultant. Give concise, actionable advice.' },
-      { role:'user',   content:`Based on this review analysis for Mort Subite Belgian Beer Bar in Austin:\n\n${REVIEW_SUMMARY}\n\nGive me the top 3 most impactful things management should do THIS WEEK to improve the customer experience. Be specific and direct. Format as numbered list.` }
-    ], 0.4, 400);
-
-    out.innerHTML = `<div class="review-section" style="border-color:var(--accent)">
-      <div class="review-section-title">✨ AI Recommendations</div>
-      <div style="font-size:13px;line-height:1.7;white-space:pre-wrap">${fmt(reply)}</div>
-    </div>`;
-    out.style.display = 'block';
-  } catch(e) {
-    out.innerHTML = `<div class="review-section"><div style="color:var(--red);font-size:12px">Error: ${e.message}</div></div>`;
-    out.style.display = 'block';
-  }
-  btn.disabled = false; btn.innerHTML = '✨ AI: What should we improve?';
-}
-
-// ─────────────────────────────────
-// KNOWLEDGE QUIZ
-// ─────────────────────────────────
-const QUIZ_QUESTIONS = [
-  {
-    q: "A customer says they have a shellfish allergy. Can they order the Seafood Paella? What would you suggest instead?",
-    topic: "allergens",
-    hint: "Check allergens on Seafood Paella and find a safe alternative"
-  },
-  {
-    q: "A guest asks for something gluten-free to start the meal. Name TWO options from the tapas section.",
-    topic: "gluten_free",
-    hint: "Look at tapas items and their gluten_free field"
-  },
-  {
-    q: "What milk alternatives can a customer get in the Cappuccino, and how much do they cost?",
-    topic: "substitutions",
-    hint: "Check Cappuccino substitutions"
-  },
-  {
-    q: "A customer wants a Belgian beer that is light/session-strength (under 6% ABV). What would you recommend?",
-    topic: "beer_knowledge",
-    hint: "Check beer items and their descriptions for ABV"
-  },
-  {
-    q: "A table of 3 wants to share a main dish. What options serve 2-3 people and are also vegan?",
-    topic: "menu_knowledge",
-    hint: "Paella and fideua sections have serving info and vegan tags"
-  }
-];
-
-let quizAnswers = [];
-let quizProfile = null;
-
-function startQuiz() {
-  document.getElementById('quiz-intro').style.display = 'none';
-  const active = document.getElementById('quiz-active');
-  active.style.display = 'flex';
-  renderQuizQuestions();
-}
-
-function renderQuizQuestions() {
-  const wrap = document.getElementById('quiz-q-wrap');
-  wrap.innerHTML = '';
-  QUIZ_QUESTIONS.forEach((q, i) => {
-    const div = document.createElement('div');
-    div.className = 'quiz-q-card';
-    div.innerHTML = `<div class="quiz-q-num">Question ${i+1} of ${QUIZ_QUESTIONS.length}</div>
-      <div class="quiz-q-text">${q.q}</div>
-      <textarea class="quiz-q-input" id="quiz-ans-${i}" rows="2" placeholder="Your answer…" oninput="updateQuizProgress()"></textarea>`;
-    wrap.appendChild(div);
-  });
-  updateQuizProgress();
-}
-
-function updateQuizProgress() {
-  const answered = QUIZ_QUESTIONS.filter((_,i) => (document.getElementById('quiz-ans-'+i)?.value||'').trim().length > 0).length;
-  document.getElementById('quiz-prog-label').textContent = `${answered} of ${QUIZ_QUESTIONS.length} answered`;
-  document.getElementById('quiz-prog-fill').style.width = `${(answered/QUIZ_QUESTIONS.length)*100}%`;
-  document.getElementById('quiz-submit-btn').disabled = answered < QUIZ_QUESTIONS.length;
-}
-
-async function submitQuiz() {
-  const btn = document.getElementById('quiz-submit-btn');
-  btn.disabled = true; btn.textContent = 'Evaluating…';
-
-  quizAnswers = QUIZ_QUESTIONS.map((q,i) => ({
-    question: q.q,
-    topic: q.topic,
-    answer: document.getElementById('quiz-ans-'+i).value.trim()
-  }));
-
-  const evalPrompt = `You are evaluating a Mort Subite bar staff trainee's menu knowledge.
-Menu context: ${JSON.stringify(MENU, null, 2)}
-
-The trainee answered these 5 questions. For each, give a score (0=wrong, 1=partial, 2=correct) and one-line feedback.
-Then give an overall profile: list their STRONG areas, WEAK areas, and 2 specific things to focus on.
-
-Questions and answers:
-${quizAnswers.map((a,i)=>`Q${i+1} [${a.topic}]: ${a.question}\nAnswer: ${a.answer}`).join('\n\n')}
-
-Respond in this exact JSON format:
-{
-  "scores": [{"q":1,"score":0,"feedback":"..."},{"q":2,"score":1,"feedback":"..."},{"q":3,"score":2,"feedback":"..."},{"q":4,"score":0,"feedback":"..."},{"q":5,"score":1,"feedback":"..."}],
-  "strong": ["topic1","topic2"],
-  "weak": ["topic3","topic4"],
-  "focus": ["specific thing 1","specific thing 2"],
-  "summary": "One sentence overall assessment"
-}`;
-
-  let profile;
-  try {
-    const raw = await groq([
-      { role:'system', content:'You are a training evaluator. Respond only with valid JSON.' },
-      { role:'user', content: evalPrompt }
-    ], 0.2, 600);
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    profile = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
-  } catch(e) {
-    profile = null;
-  }
-
-  quizProfile = profile;
-  showQuizResults(profile);
-}
-
-function showQuizResults(profile) {
-  const overlay = document.getElementById('quiz-overlay');
-  const total   = profile ? profile.scores.reduce((s,x)=>s+x.score,0) : null;
-  const maxScore = QUIZ_QUESTIONS.length * 2;
-
-  let html = `<div style="display:flex;flex-direction:column;flex:1;overflow-y:auto;padding:16px;gap:10px">
-    <div class="profile-card">
-      <div class="profile-section-title">Your Score: ${total !== null ? total+'/'+maxScore : 'Evaluated'}</div>
-      ${profile ? `<div style="font-size:13px;color:var(--muted);margin-bottom:10px">${profile.summary}</div>` : ''}`;
-
-  if (profile) {
-    const topics = {allergens:'Allergens',gluten_free:'Gluten-Free',substitutions:'Substitutions',beer_knowledge:'Beer Knowledge',menu_knowledge:'Menu Structure'};
-    const scoreMap = {};
-    profile.scores.forEach((s,i) => { scoreMap[QUIZ_QUESTIONS[i].topic] = s.score; });
-
-    html += `<div class="profile-section-title" style="margin-top:8px">Knowledge Map</div>`;
-    Object.entries(topics).forEach(([k,label]) => {
-      const score = scoreMap[k] ?? 0;
-      const pct   = (score/2)*100;
-      const cls   = score===2?'skill-strong':score===1?'skill-ok':'skill-weak';
-      html += `<div class="profile-skill">
-        <div class="profile-skill-name">${label}</div>
-        <div class="profile-skill-bar"><div class="profile-skill-fill ${cls}" style="width:${pct}%"></div></div>
-        <div style="font-size:11px;color:var(--muted);width:24px;text-align:right">${score}/2</div>
-      </div>`;
-    });
-
-    if (profile.focus?.length) {
-      html += `<div class="profile-section-title" style="margin-top:10px">Focus Areas for You</div>`;
-      profile.focus.forEach(f => { html += `<div class="strength-item">🎯 <span>${f}</span></div>`; });
-    }
-  }
-
-  html += `</div>`;
-
-  // Q&A feedback
-  if (profile?.scores) {
-    html += `<div class="profile-card">
-      <div class="profile-section-title">Answer Feedback</div>`;
-    profile.scores.forEach((s,i) => {
-      const icon = s.score===2?'✅':s.score===1?'⚠️':'❌';
-      html += `<div style="margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border)">
-        <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:2px">Q${i+1}: ${QUIZ_QUESTIONS[i].topic.replace('_',' ')}</div>
-        <div style="font-size:12px">${icon} ${s.feedback}</div>
-      </div>`;
-    });
-    html += `</div>`;
-  }
-
-  html += `<button onclick="finishQuiz()" style="background:var(--accent);color:#000;border:none;border-radius:8px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;margin:0 0 12px">
-    Start Training →
-  </button></div>`;
-
-  overlay.innerHTML = html;
-
-  // Inject profile into chat system prompt
-  if (profile) {
-    const weakStr   = (profile.weak  ||[]).join(', ') || 'none';
-    const strongStr = (profile.strong||[]).join(', ') || 'none';
-    const focusStr  = (profile.focus ||[]).join('; ') || 'general menu knowledge';
-    window._quizProfile = `
-
-TRAINEE KNOWLEDGE PROFILE — CRITICAL: Adapt every response to this profile.
-- Strong areas (they already know this — keep explanations brief): ${strongStr}
-- Weak areas (go deeper here, give examples, be encouraging): ${weakStr}
-- Specific training objectives for this session: ${focusStr}
-- Quiz summary: ${profile.summary || ''}
-Rules: When they ask about a weak area, explain it clearly and give a real example from the menu. When they ask about a strong area, give a quick answer and pivot toward a weak area they should also know. Always end responses in weak areas with a follow-up question to reinforce learning.`;
-  }
-}
-
-function finishQuiz() {
-  const overlay = document.getElementById('quiz-overlay');
-  overlay.style.display = 'none';
-  initWelcome();
-  if (quizProfile) {
-    const weak   = (quizProfile.weak  ||[]).map(w=>w.replace(/_/g,' ')).join(', ') || 'none identified';
-    const strong = (quizProfile.strong||[]).map(s=>s.replace(/_/g,' ')).join(', ') || 'none identified';
-    const focus  = (quizProfile.focus ||[]).map((f,i)=>`<br>${i+1}. ${f}`).join('') || '';
-    addMsg('🎓','av-system','Training Profile Active',
-      `<strong style="color:var(--green)">Strong:</strong> ${strong}<br>
-       <strong style="color:var(--red)">Needs work:</strong> ${weak}<br>
-       <strong style="color:var(--accent)">Your training objectives:${focus}</strong><br><br>
-       My answers will focus on your weak areas. Ask me anything — I will adapt to your level.`,
-      'bubble-system');
-  }
-}
-
-function skipQuiz() {
-  document.getElementById('quiz-overlay').style.display = 'none';
-  initWelcome();
-}
-
-// Override buildSystemPrompt to include quiz profile if available
-const _origBuildPrompt = buildSystemPrompt;
-buildSystemPrompt = function() {
-  return _origBuildPrompt() + (window._quizProfile || '');
-};
-
-// ─────────────────────────────────
-// INIT
-// ─────────────────────────────────
-setMode('trainee');
-renderMenu();
-// Restore saved key into input
-if (GROQ_KEY) document.getElementById('key-input').value = GROQ_KEY;
-</script>
+<input type="file" id="json-file-input" accept=".json" style="display:none" />
+
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script src="app.js"></script>
 </body>
 </html>

@@ -1,0 +1,11 @@
+{
+  "name": "openclaw-hackathon",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "preview": "http-server . -p 4174 -c-1"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
